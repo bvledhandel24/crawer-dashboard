@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRAWER - Nieuwe producten - voortgang tracking</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        :root {
+            --primary: #dc2626;
+            --primary-dark: #991b1b;
+            --success: #0e9f6e;
+            --warning: #ff9800;
+            --danger: #f05252;
+            --neutral: #6b7280;
+            --bg: #f9fafb;
+            --surface: #ffffff;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --color-pm: #3b82f6;
+            --color-china: #dc2626;
+            --color-cs: #059669;
+            --color-ecm: #8b5cf6;
+            --color-marketing: #f59e0b;
+            --color-finance: #06b6d4;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Outfit', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1600px; margin: 0 auto; padding: 2rem; }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; }
+        
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+        
+        .header-title p { opacity: 0.9; font-size: 0.95rem; }
+        
+        .header-right { position: relative; z-index: 1; }
+        
+        .user-info {
+            background: rgba(255,255,255,0.15);
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .user-info input {
+            background: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .management-overview {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 2px solid var(--primary);
+        }
+        
+        .management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .management-header h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .projects-compact {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .compact-project {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .compact-project:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .compact-project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .compact-project-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        .compact-progress {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0.5rem 0;
+        }
+        
+        .compact-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .compact-progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+
+        .delay-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+        
+        .delay-indicator.on-track { background: var(--success); }
+        .delay-indicator.behind { background: var(--danger); animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .dashboard-grid { display: grid; gap: 2rem; margin-bottom: 2rem; }
+        
+        .project-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .dept-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .dept-badge.pm { background: var(--color-pm); }
+        .dept-badge.china { background: var(--color-china); }
+        .dept-badge.cs { background: var(--color-cs); }
+        .dept-badge.ecm { background: var(--color-ecm); }
+        .dept-badge.marketing { background: var(--color-marketing); }
+        .dept-badge.finance { background: var(--color-finance); }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 20px;
+            max-width: 1400px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-content.small { max-width: 600px; }
+        .modal-content.medium { max-width: 900px; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 { font-size: 1.75rem; font-weight: 700; }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body { padding: 2rem; }
+
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-secondary { background: var(--border); color: var(--text); }
+        .btn-secondary:hover { background: var(--neutral); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        .form-group {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px var(--shadow);
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 999;
+        }
+
+        .sync-status.show { display: flex; }
+        .sync-status.success { border-left: 4px solid var(--success); }
+        .sync-status.error { border-left: 4px solid var(--danger); }
+
+        .tasks-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+        
+        .tasks-table th {
+            background: var(--bg);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+        }
+        
+        .tasks-table td {
+            background: var(--surface);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tasks-table tr td:first-child { border-left: 1px solid var(--border); border-radius: 8px 0 0 8px; }
+        .tasks-table tr td:last-child { border-right: 1px solid var(--border); border-radius: 0 8px 8px 0; }
+
+        .task-status-select {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 2px solid var(--border);
+            background: white;
+            cursor: pointer;
+        }
+
+        .status-waiting { background: #e5e7eb; color: #374151; }
+        .status-busy { background: #fef3c7; color: #92400e; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 0.4rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover { background: var(--bg); }
+
+        .history-log {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 0.75rem;
+            border-left: 3px solid var(--primary);
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .history-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .dragging { opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <div class="header-title">
+                    <h1>CRAWER - Nieuwe producten - voortgang tracking</h1>
+                    <p>Real-time project monitoring & team collaboration</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <input type="text" id="userName" placeholder="Jouw naam (verplicht)..." required>
+                </div>
+            </div>
+        </header>
+
+        <div class="management-overview">
+            <div class="management-header">
+                <h2>📊 Management Overview</h2>
+            </div>
+            <div class="projects-compact" id="projectsCompact"></div>
+        </div>
+
+        <div class="dashboard-grid" id="dashboard"></div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openNewProject()">➕ Nieuw Project</button>
+            <button class="btn btn-secondary" onclick="openTemplateManager()">⚙️ Template Beheer</button>
+            <button class="btn btn-secondary" onclick="openArchivedProjects()">📁 Gearchiveerde Projecten</button>
+            <button class="btn btn-success" onclick="openSheetsSetup()">🔄 Google Sheets Setup</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="close-btn" onclick="closeModal('projectModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="toolbar">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-success" onclick="openAddTask()">➕ Taak Toevoegen</button>
+                        <button class="btn btn-secondary" onclick="openProjectSettings()">⚙️ Project Instellingen</button>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="openHistory()">📜 Geschiedenis</button>
+                        <button class="btn btn-primary" onclick="saveAllData()">💾 Opslaan</button>
+                    </div>
+                </div>
+                <table class="tasks-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;">↕</th>
+                            <th style="width: 40px;">#</th>
+                            <th style="width: 40px;">✓</th>
+                            <th>Taak</th>
+                            <th>Afdeling</th>
+                            <th style="width: 80px;">Week</th>
+                            <th style="width: 80px;">Duur</th>
+                            <th style="width: 130px;">Status</th>
+                            <th style="width: 100px;">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="editTaskModal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h2>Taak Bewerken</h2>
+                <button class="close-btn" onclick="closeModal('editTaskModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Taaknaam *</label>
+                    <input type="text" id="editTaskName" required>
+                </div>
+                <div class="form-group">
+                    <label>Afdeling *</label>
+                    <input type="text" id="editTaskDept" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Week *</label>
+                        <input type="number" id="editTaskWeek" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Duur (weken) *</label>
+                        <input type="number" id="editTaskDuration" required min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notities</label>
+                    <textarea id="editTaskNotes" rows="4"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-primary" onclick="saveTaskEdit()" style="flex: 1;">💾 Opslaan</button>
+                    <button class="btn btn-secondary" onclick="closeModal('editTaskModal')">Annuleren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="historyModal">
+        <div class="modal-content medium">
+            <div class="modal-header">
+                <h2>📜 Wijzigingsgeschiedenis</h2>
+                <button class="close-btn" onclick="closeModal('historyModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-log" id="historyLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="templateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Template Beheer</h2>
+                <button class="close-btn" onclick="closeModal('templateModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--text-muted);">
+                    Beheer de standaard taken die worden gebruikt voor nieuwe projecten. 
+                    Wijzigingen hier worden alleen toegepast op nieuwe projecten.
+                </p>
+                <button class="btn btn-success" onclick="addTemplateTask()" style="margin-bottom: 1rem;">➕ Taak Toevoegen</button>
+                <table class="tasks-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Taak</th>
+                            <th>Afdeling</th>
+                            <th>Week</th>
+                            <th>Duur</th>
+                            <th>Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templateTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="sheetsModal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h2>🔄 Google Sheets Setup</h2>
+                <button class="close-btn" onclick="closeModal('sheetsModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: var(--bg); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">Stappen:</h3>
+                    <ol style="margin-left: 1.5rem; line-height: 2;">
+                        <li>Maak een nieuwe Google Sheet</li>
+                        <li>Deel met "Iedereen met link" → Bewerker</li>
+                        <li>Kopieer de URL en plak hieronder</li>
+                    </ol>
+                </div>
+                <div class="form-group">
+                    <label>Google Sheets URL</label>
+                    <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+                </div>
+                <button class="btn btn-primary" onclick="setupSheets()" style="width: 100%;">💾 Opslaan & Verbinden</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sync-status" id="syncStatus">
+        <span id="syncIcon">✓</span>
+        <span id="syncMessage">Opgeslagen</span>
+    </div>
+
+    <script>
+        let currentUser = '';
+        let projects = {};
+        let taskTemplate = [];
+        let projectHistory = {};
+        let currentProject = null;
+        let editingTaskIndex = null;
+        let draggedElement = null;
+        let draggedIndex = null;
+
+        const defaultTasks = [
+            {task: "Data research", dept: "PM - CS - ECM - Marketing", week: 1, duration: 2},
+            {task: "Brainstorm mogelijkheden en kostenplaatje", dept: "PM", week: 2, duration: 2},
+            {task: "Keuze: product vernieuwen + leverancier", dept: "PM", week: 3, duration: 1},
+            {task: "Origineel product onderzoeken", dept: "PM", week: 3, duration: 2},
+            {task: "Twee wekelijkse meeting met fabrikant", dept: "PM - China", week: 3, duration: 1},
+            {task: "Eerste informatie naar fabrikant", dept: "PM - China", week: 3, duration: 1},
+            {task: "Bevestiging uitvoerbaarheid fabrikant", dept: "China", week: 4, duration: 1},
+            {task: "Product planning invullen", dept: "China", week: 4, duration: 1},
+            {task: "Eerste inschatting projectkosten", dept: "China", week: 5, duration: 1},
+            {task: "Product planning ontvangen", dept: "PM - China", week: 5, duration: 1},
+            {task: "Product planning Laudermarke invullen", dept: "PM", week: 5, duration: 2},
+            {task: "New supplier bestand naar fabrikant", dept: "PM - China", week: 5, duration: 1},
+            {task: "Origineel product opsturen", dept: "PM - China", week: 6, duration: 1},
+            {task: "SKU/EAN aanvragen", dept: "PM", week: 6, duration: 1},
+            {task: "SKU/EAN invoeren in Picqer", dept: "PM", week: 6, duration: 1},
+            {task: "SKU/EAN + productmap naar fabrikant", dept: "PM", week: 6, duration: 1},
+            {task: "Artikelnummer fabrikant ontvangen", dept: "China", week: 6, duration: 2},
+            {task: "Artikelnummer toevoegen in Picqer", dept: "PM", week: 7, duration: 1},
+            {task: "Extra project informatie delen", dept: "PM - China", week: 7, duration: 2},
+            {task: "Ontwikkeling nieuwe product starten", dept: "PM - China", week: 8, duration: 8},
+            {task: "Aanpassingen uiterlijk maken", dept: "PM - China", week: 9, duration: 7},
+            {task: "Uiterlijk goedkeuren", dept: "PM", week: 15, duration: 1},
+            {task: "Definitieve kostenplaatje ontvangen", dept: "China", week: 16, duration: 1},
+            {task: "Prijzen goedkeuren", dept: "PM", week: 16, duration: 2},
+            {task: "Factuur malkosten ontvangen", dept: "PM - China", week: 17, duration: 1},
+            {task: "Factuur naar Finance sturen", dept: "PM", week: 17, duration: 1},
+            {task: "Malkosten betalen", dept: "Finance", week: 17, duration: 2},
+            {task: "Innerlijk ontwikkelen (structural/optical/electronic)", dept: "PM - China", week: 17, duration: 8},
+            {task: "3D bestand ontvangen", dept: "PM", week: 24, duration: 1},
+            {task: "3D print maken", dept: "PM - China", week: 24, duration: 2},
+            {task: "Afspraak testen 3D print", dept: "PM", week: 25, duration: 1},
+            {task: "3D print testen in trekker", dept: "PM", week: 26, duration: 1},
+            {task: "Aanpassingen doorsturen", dept: "PM - China", week: 27, duration: 1},
+            {task: "3D bestand aanpassen", dept: "China", week: 27, duration: 2},
+            {task: "Nieuw 3D bestand ontvangen", dept: "PM", week: 29, duration: 1},
+            {task: "Nieuwe 3D print maken", dept: "PM - China", week: 29, duration: 2},
+            {task: "Afspraak aangepaste print testen", dept: "PM", week: 30, duration: 1},
+            {task: "Aangepaste 3D print testen", dept: "PM", week: 31, duration: 1},
+            {task: "3D print goedkeuren (afmetingen)", dept: "PM - China", week: 31, duration: 1},
+            {task: "Mallen maken", dept: "China", week: 32, duration: 8},
+            {task: "Sample T0 maken", dept: "China", week: 39, duration: 5},
+            {task: "Sample T0 versturen", dept: "China", week: 44, duration: 3},
+            {task: "Afspraak T0 sample testen", dept: "PM", week: 45, duration: 1},
+            {task: "T0 sample testen in trekker", dept: "PM", week: 47, duration: 2},
+            {task: "Aanpassingen T0 doorsturen", dept: "PM - China", week: 48, duration: 1}
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userInput = document.getElementById('userName');
+            userInput.addEventListener('change', (e) => {
+                if (!e.target.value.trim()) {
+                    alert('Naam is verplicht voor het maken van wijzigingen!');
+                    return;
+                }
+                currentUser = e.target.value.trim();
+                localStorage.setItem('userName', currentUser);
+                showSyncStatus(`Welkom ${currentUser}!`, 'success');
+            });
+            
+            currentUser = localStorage.getItem('userName') || '';
+            userInput.value = currentUser;
+            
+            loadAllData();
+            render();
+        });
+
+        function requireUser() {
+            if (!currentUser) {
+                alert('⚠️ Vul eerst je naam in rechtsboven voordat je wijzigingen maakt!');
+                return false;
+            }
+            return true;
+        }
+
+        function loadAllData() {
+            const stored = localStorage.getItem('projects');
+            const storedTemplate = localStorage.getItem('taskTemplate');
+            const storedHistory = localStorage.getItem('projectHistory');
+            
+            if (stored) {
+                projects = JSON.parse(stored);
+            } else {
+                initializeDefaultData();
+            }
+            
+            taskTemplate = storedTemplate ? JSON.parse(storedTemplate) : defaultTasks;
+            projectHistory = storedHistory ? JSON.parse(storedHistory) : {};
+        }
+
+        function initializeDefaultData() {
+            projects = {
+                'CR-3052': {
+                    name: 'CR-3052 LED Werklamp',
+                    code: 'CR-3052',
+                    status: 'active',
+                    currentWeek: 16,
+                    startDate: '2026-02-01',
+                    tasks: defaultTasks.map((t, i) => ({
+                        ...t, 
+                        id: i, 
+                        completed: false, 
+                        status: 'waiting', 
+                        notes: '',
+                        lastModified: null,
+                        modifiedBy: null
+                    }))
+                },
+                'CR-1067': {
+                    name: 'CR-1067 LED Mistlamp',
+                    code: 'CR-1067',
+                    status: 'active',
+                    currentWeek: 8,
+                    startDate: '2026-01-15',
+                    tasks: defaultTasks.map((t, i) => ({
+                        ...t, 
+                        id: i, 
+                        completed: false, 
+                        status: 'waiting', 
+                        notes: '',
+                        lastModified: null,
+                        modifiedBy: null
+                    }))
+                }
+            };
+            
+            projectHistory = { 'CR-3052': [], 'CR-1067': [] };
+            saveAllData();
+        }
+
+        function saveAllData() {
+            localStorage.setItem('projects', JSON.stringify(projects));
+            localStorage.setItem('taskTemplate', JSON.stringify(taskTemplate));
+            localStorage.setItem('projectHistory', JSON.stringify(projectHistory));
+            showSyncStatus('Data opgeslagen', 'success');
+        }
+
+        function logAction(projectCode, action) {
+            if (!projectHistory[projectCode]) {
+                projectHistory[projectCode] = [];
+            }
+            
+            projectHistory[projectCode].unshift({
+                timestamp: new Date().toISOString(),
+                user: currentUser || 'Onbekend',
+                action: action
+            });
+            
+            if (projectHistory[projectCode].length > 100) {
+                projectHistory[projectCode] = projectHistory[projectCode].slice(0, 100);
+            }
+        }
+
+        function calculateProgress(tasks) {
+            if (!tasks || tasks.length === 0) return 0;
+            return tasks.filter(t => t.completed).length / tasks.length;
+        }
+
+        function calculateEndDate(startDate, tasks) {
+            if (!startDate || !tasks) return null;
+            const start = new Date(startDate);
+            const totalWeeks = Math.max(...tasks.map(t => t.week + t.duration));
+            const end = new Date(start);
+            end.setDate(end.getDate() + (totalWeeks * 7));
+            return end.toLocaleDateString('nl-NL');
+        }
+
+        function isProjectBehindSchedule(project) {
+            if (!project.startDate) return false;
+            const startDate = new Date(project.startDate);
+            const today = new Date();
+            const weeksPassed = Math.floor((today - startDate) / (7 * 24 * 60 * 60 * 1000));
+            return project.currentWeek < weeksPassed;
+        }
+
+        function getDeptBadge(dept) {
+            const depts = dept.toLowerCase().split('-').map(d => d.trim());
+            const colors = {
+                'pm': 'pm', 'china': 'china', 'cs': 'cs',
+                'ecm': 'ecm', 'marketing': 'marketing', 'finance': 'finance'
+            };
+            return depts.map(d => {
+                const colorClass = colors[d] || 'pm';
+                return `<span class="dept-badge ${colorClass}">${d.toUpperCase()}</span>`;
+            }).join(' ');
+        }
+
+        function showSyncStatus(message, type) {
+            const status = document.getElementById('syncStatus');
+            status.className = 'sync-status show ' + type;
+            document.getElementById('syncIcon').textContent = type === 'success' ? '✓' : '⚠';
+            document.getElementById('syncMessage').textContent = message;
+            setTimeout(() => status.classList.remove('show'), 3000);
+        }
+
+        function render() {
+            renderManagementOverview();
+            renderDashboard();
+        }
+
+        function renderManagementOverview() {
+            const container = document.getElementById('projectsCompact');
+            container.innerHTML = '';
+            
+            Object.entries(projects)
+                .filter(([_, p]) => p.status === 'active')
+                .forEach(([code, project]) => {
+                    const progress = calculateProgress(project.tasks);
+                    const isBehind = isProjectBehindSchedule(project);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'compact-project';
+                    card.onclick = () => openProjectDetail(code);
+                    
+                    card.innerHTML = `
+                        <div class="compact-project-header">
+                            <div class="compact-project-code">${code}</div>
+                        </div>
+                        <div class="compact-progress">${Math.round(progress * 100)}%</div>
+                        <div class="compact-progress-bar">
+                            <div class="compact-progress-fill" style="width: ${progress * 100}%"></div>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+                            <span>Week ${project.currentWeek}</span>
+                            <span class="delay-indicator ${isBehind ? 'behind' : 'on-track'}"></span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+        }
+
+        function renderDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = '';
+            
+            Object.entries(projects)
+                .filter(([_, p]) => p.status === 'active')
+                .forEach(([code, project]) => {
+                    const progress = calculateProgress(project.tasks);
+                    const endDate = calculateEndDate(project.startDate, project.tasks);
+                    const isBehind = isProjectBehindSchedule(project);
+                    const busyTasks = project.tasks.filter(t => t.status === 'busy').length;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    card.onclick = () => openProjectDetail(code);
+                    
+                    card.innerHTML = `
+                        <h3 style="color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-family: 'JetBrains Mono'; background: var(--primary); color: white; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem;">${code}</span>
+                            <span>${project.name}</span>
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                            <div style="background: var(--bg); padding: 1rem; border-radius: 8px;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Voortgang</div>
+                                <div style="font-size: 1.5rem; font-weight: 700;">${Math.round(progress * 100)}%</div>
+                            </div>
+                            <div style="background: var(--bg); padding: 1rem; border-radius: 8px;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Huidige Week</div>
+                                <div style="font-size: 1.5rem; font-weight: 700;">Week ${project.currentWeek}</div>
+                            </div>
+                            <div style="background: var(--bg); padding: 1rem; border-radius: 8px;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Actieve Taken</div>
+                                <div style="font-size: 1.5rem; font-weight: 700;">${busyTasks}</div>
+                            </div>
+                            <div style="background: var(--bg); padding: 1rem; border-radius: 8px;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Planning</div>
+                                <div style="font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                                    ${isBehind ? '⚠️ Achter' : '✓ Op tijd'}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">📅 Verwachte einddatum: ${endDate || 'Niet berekend'}</div>
+                    `;
+                    dashboard.appendChild(card);
+                });
+        }
+
+        function openProjectDetail(code) {
+            if (!requireUser()) return;
+            
+            currentProject = code;
+            const project = projects[code];
+            document.getElementById('modalTitle').textContent = `${project.code} - ${project.name}`;
+            
+            renderTasksTable();
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function renderTasksTable() {
+            const project = projects[currentProject];
+            const tbody = document.getElementById('tasksTableBody');
+            tbody.innerHTML = '';
+            
+            project.tasks.forEach((task, index) => {
+                const row = document.createElement('tr');
+                row.draggable = true;
+                row.dataset.index = index;
+                row.addEventListener('dragstart', handleDragStart);
+                row.addEventListener('dragover', handleDragOver);
+                row.addEventListener('drop', handleDrop);
+                row.addEventListener('dragend', handleDragEnd);
+                
+                row.innerHTML = `
+                    <td style="text-align: center; cursor: grab;">⋮⋮</td>
+                    <td style="text-align: center; font-family: 'JetBrains Mono'; color: var(--text-muted);">${index + 1}</td>
+                    <td><input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})" style="width: 20px; height: 20px; cursor: pointer;"></td>
+                    <td>${task.task}</td>
+                    <td>${getDeptBadge(task.dept)}</td>
+                    <td style="text-align: center;">Week ${task.week}</td>
+                    <td style="text-align: center;">${task.duration}w</td>
+                    <td>
+                        <select class="task-status-select status-${task.status}" onchange="changeTaskStatus(${index}, this.value)">
+                            <option value="waiting" ${task.status === 'waiting' ? 'selected' : ''}>⏸️ Wachtend</option>
+                            <option value="busy" ${task.status === 'busy' ? 'selected' : ''}>⏳ Bezig</option>
+                            <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>✓ Voltooid</option>
+                        </select>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="action-btn" onclick="editTask(${index})" title="Bewerken">✏️</button>
+                        <button class="action-btn" onclick="deleteTask(${index})" title="Verwijderen" style="color: var(--danger);">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            draggedIndex = parseInt(this.dataset.index);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            
+            const dropIndex = parseInt(this.dataset.index);
+            if (draggedIndex !== dropIndex) {
+                const tasks = projects[currentProject].tasks;
+                const draggedTask = tasks[draggedIndex];
+                tasks.splice(draggedIndex, 1);
+                tasks.splice(dropIndex, 0, draggedTask);
+                tasks.forEach((t, i) => t.id = i);
+                
+                logAction(currentProject, `Taak volgorde gewijzigd door ${currentUser}`);
+                saveAllData();
+                renderTasksTable();
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        function toggleTask(index) {
+            if (!requireUser()) return;
+            projects[currentProject].tasks[index].completed = !projects[currentProject].tasks[index].completed;
+            projects[currentProject].tasks[index].lastModified = new Date().toISOString();
+            projects[currentProject].tasks[index].modifiedBy = currentUser;
+            
+            logAction(currentProject, `Taak "${projects[currentProject].tasks[index].task}" ${projects[currentProject].tasks[index].completed ? 'voltooid' : 'onvoltooid gemaakt'} door ${currentUser}`);
+            saveAllData();
+            render();
+            renderTasksTable();
+        }
+
+        function changeTaskStatus(index, status) {
+            if (!requireUser()) return;
+            const oldStatus = projects[currentProject].tasks[index].status;
+            projects[currentProject].tasks[index].status = status;
+            projects[currentProject].tasks[index].lastModified = new Date().toISOString();
+            projects[currentProject].tasks[index].modifiedBy = currentUser;
+            
+            logAction(currentProject, `Status van "${projects[currentProject].tasks[index].task}" gewijzigd van ${oldStatus} naar ${status} door ${currentUser}`);
+            saveAllData();
+            showSyncStatus(`Status gewijzigd door ${currentUser}`, 'success');
+        }
+
+        function editTask(index) {
+            if (!requireUser()) return;
+            editingTaskIndex = index;
+            const task = projects[currentProject].tasks[index];
+            
+            document.getElementById('editTaskName').value = task.task;
+            document.getElementById('editTaskDept').value = task.dept;
+            document.getElementById('editTaskWeek').value = task.week;
+            document.getElementById('editTaskDuration').value = task.duration;
+            document.getElementById('editTaskNotes').value = task.notes || '';
+            
+            document.getElementById('editTaskModal').classList.add('active');
+        }
+
+        function saveTaskEdit() {
+            if (!requireUser()) return;
+            
+            const task = projects[currentProject].tasks[editingTaskIndex];
+            task.task = document.getElementById('editTaskName').value;
+            task.dept = document.getElementById('editTaskDept').value;
+            task.week = parseInt(document.getElementById('editTaskWeek').value);
+            task.duration = parseInt(document.getElementById('editTaskDuration').value);
+            task.notes = document.getElementById('editTaskNotes').value;
+            task.lastModified = new Date().toISOString();
+            task.modifiedBy = currentUser;
+            
+            logAction(currentProject, `Taak "${task.task}" bewerkt door ${currentUser}`);
+            saveAllData();
+            closeModal('editTaskModal');
+            renderTasksTable();
+            showSyncStatus('Taak bijgewerkt', 'success');
+        }
+
+        function deleteTask(index) {
+            if (!requireUser()) return;
+            if (!confirm('Weet je zeker dat je deze taak wilt verwijderen?')) return;
+            
+            const taskName = projects[currentProject].tasks[index].task;
+            projects[currentProject].tasks.splice(index, 1);
+            projects[currentProject].tasks.forEach((t, i) => t.id = i);
+            
+            logAction(currentProject, `Taak "${taskName}" verwijderd door ${currentUser}`);
+            saveAllData();
+            renderTasksTable();
+            showSyncStatus('Taak verwijderd', 'success');
+        }
+
+        function openAddTask() {
+            if (!requireUser()) return;
+            const name = prompt('Taaknaam:');
+            if (!name) return;
+            const dept = prompt('Afdeling (bijv. PM - China):');
+            if (!dept) return;
+            const week = parseInt(prompt('Start week:'));
+            if (!week) return;
+            const duration = parseInt(prompt('Duur in weken:'));
+            if (!duration) return;
+            
+            projects[currentProject].tasks.push({
+                id: projects[currentProject].tasks.length,
+                task: name,
+                dept: dept,
+                week: week,
+                duration: duration,
+                completed: false,
+                status: 'waiting',
+                notes: '',
+                lastModified: new Date().toISOString(),
+                modifiedBy: currentUser
+            });
+            
+            logAction(currentProject, `Taak "${name}" toegevoegd door ${currentUser}`);
+            saveAllData();
+            renderTasksTable();
+            showSyncStatus('Taak toegevoegd', 'success');
+        }
+
+        function openProjectSettings() {
+            if (!requireUser()) return;
+            const project = projects[currentProject];
+            const newWeek = prompt(`Huidige week (nu: ${project.currentWeek}):`, project.currentWeek);
+            if (newWeek && parseInt(newWeek) !== project.currentWeek) {
+                project.currentWeek = parseInt(newWeek);
+                logAction(currentProject, `Huidige week aangepast naar ${newWeek} door ${currentUser}`);
+                saveAllData();
+                render();
+                showSyncStatus('Week bijgewerkt', 'success');
+            }
+        }
+
+        function openHistory() {
+            const history = projectHistory[currentProject] || [];
+            const log = document.getElementById('historyLog');
+            log.innerHTML = '';
+            
+            if (history.length === 0) {
+                log.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Geen wijzigingen gelogd</p>';
+            } else {
+                history.forEach(entry => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    const date = new Date(entry.timestamp);
+                    item.innerHTML = `
+                        <div class="history-meta">
+                            <strong>${entry.user}</strong>
+                            <span>${date.toLocaleString('nl-NL')}</span>
+                        </div>
+                        <div class="history-action">${entry.action}</div>
+                    `;
+                    log.appendChild(item);
+                });
+            }
+            
+            document.getElementById('historyModal').classList.add('active');
+        }
+
+        function openNewProject() {
+            if (!requireUser()) return;
+            const code = prompt('Project code (bijv. CR-3053):');
+            if (!code) return;
+            if (projects[code]) {
+                alert('Dit project bestaat al!');
+                return;
+            }
+            
+            const name = prompt('Project naam:');
+            if (!name) return;
+            
+            const startDate = prompt('Startdatum (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+            if (!startDate) return;
+            
+            projects[code] = {
+                name: name,
+                code: code,
+                status: 'active',
+                currentWeek: 1,
+                startDate: startDate,
+                tasks: (taskTemplate.length > 0 ? taskTemplate : defaultTasks).map((t, i) => ({
+                    ...t,
+                    id: i,
+                    completed: false,
+                    status: 'waiting',
+                    notes: '',
+                    lastModified: null,
+                    modifiedBy: null
+                }))
+            };
+            
+            projectHistory[code] = [];
+            logAction(code, `Project aangemaakt door ${currentUser}`);
+            saveAllData();
+            render();
+            showSyncStatus(`Project ${code} aangemaakt!`, 'success');
+        }
+
+        function openTemplateManager() {
+            if (!requireUser()) return;
+            const tbody = document.getElementById('templateTableBody');
+            tbody.innerHTML = '';
+            
+            taskTemplate.forEach((task, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="text-align: center;">${index + 1}</td>
+                    <td>${task.task}</td>
+                    <td>${task.dept}</td>
+                    <td style="text-align: center;">${task.week}</td>
+                    <td style="text-align: center;">${task.duration}</td>
+                    <td style="text-align: center;">
+                        <button class="action-btn" onclick="editTemplateTask(${index})">✏️</button>
+                        <button class="action-btn" onclick="deleteTemplateTask(${index})" style="color: var(--danger);">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('templateModal').classList.add('active');
+        }
+
+        function addTemplateTask() {
+            const name = prompt('Taaknaam:');
+            if (!name) return;
+            const dept = prompt('Afdeling:');
+            if (!dept) return;
+            const week = parseInt(prompt('Start week:'));
+            if (!week) return;
+            const duration = parseInt(prompt('Duur:'));
+            if (!duration) return;
+            
+            taskTemplate.push({task: name, dept: dept, week: week, duration: duration});
+            saveAllData();
+            openTemplateManager();
+            showSyncStatus('Template taak toegevoegd', 'success');
+        }
+
+        function editTemplateTask(index) {
+            const task = taskTemplate[index];
+            const name = prompt('Taaknaam:', task.task);
+            if (name) task.task = name;
+            const dept = prompt('Afdeling:', task.dept);
+            if (dept) task.dept = dept;
+            const week = prompt('Week:', task.week);
+            if (week) task.week = parseInt(week);
+            const duration = prompt('Duur:', task.duration);
+            if (duration) task.duration = parseInt(duration);
+            
+            saveAllData();
+            openTemplateManager();
+        }
+
+        function deleteTemplateTask(index) {
+            if (!confirm('Template taak verwijderen?')) return;
+            taskTemplate.splice(index, 1);
+            saveAllData();
+            openTemplateManager();
+        }
+
+        function openArchivedProjects() {
+            const archived = Object.entries(projects).filter(([_, p]) => p.status === 'archived');
+            if (archived.length === 0) {
+                alert('Geen gearchiveerde projecten');
+            } else {
+                alert('Gearchiveerde projecten:\n\n' + archived.map(([code, p]) => `${code}: ${p.name}`).join('\n') + '\n\nOm te herstellen, open de browser console en gebruik:\nprojects["CODE"].status = "active"');
+            }
+        }
+
+        function openSheetsSetup() {
+            document.getElementById('sheetsModal').classList.add('active');
+        }
+
+        function setupSheets() {
+            const url = document.getElementById('sheetsUrl').value;
+            if (!url) {
+                alert('Vul een Google Sheets URL in');
+                return;
+            }
+            
+            localStorage.setItem('sheetsUrl', url);
+            alert('✅ Google Sheets URL opgeslagen!\n\nNota: Volledige sync functionaliteit vereist server-side code.\nMomenteel wordt data lokaal opgeslagen.');
+            closeModal('sheetsModal');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
